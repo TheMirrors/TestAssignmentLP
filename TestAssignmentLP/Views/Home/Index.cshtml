@@ -1,0 +1,67 @@
+﻿
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width"/>
+    <title>Тестовое задание</title>
+</head>
+<body>
+<div>
+    <div id="modDialog" class="modal fade">
+        <div id="dialogContent" class="modal-dialog"></div>
+    </div>
+    <h3 align="center">Каталог магазинов</h3>
+    <div class="table">
+        <div class="row">
+            <div class="col-xs-3 col-md-3 col-lg-2 bold">
+                Название Магазина
+            </div>
+            <div class="col-xs-4 col-md-3 col-lg-5 bold">
+                Адрес
+            </div>
+            <div class="col-xs-2 col-md-3 col-lg-2 bold">
+                Режим работы
+            </div>
+            <div class="col-xs-3 col-md-3 col-lg-2 bold">
+                Список товаров
+            </div>
+        </div>
+        @foreach (var b in ViewBag.Shops)
+        {
+            <div class="row">
+                <div class="col-xs-3 col-md-3 col-lg-2">
+                    @b.Name
+                </div>
+                <div class="col-xs-4 col-md-3 col-lg-5">
+                    @b.Address
+                </div>
+                <div class="col-xs-2 col-md-3 col-lg-2">
+                    @b.Shedule
+                </div>
+                <div class="col-xs-3 col-md-3 col-lg-2">
+                    @Html.ActionLink("Товары", "Items", new {id = b.Id, sName = b.Name}, new {@class = "ShopItem"})
+                </div>
+            </div>
+        }
+    </div>
+</div>
+</body>
+</html>
+@section scripts
+{
+    <script type="text/javascript">
+
+        $(function() {
+            $.ajaxSetup({ cache: false });
+            $(".ShopItem").click(function(e) {
+
+                e.preventDefault();
+                $.get(this.href, function(data) {
+                    $('#dialogContent').html(data);
+                    $('#modDialog').modal('show');
+                });
+            });
+        });
+    </script>
+}

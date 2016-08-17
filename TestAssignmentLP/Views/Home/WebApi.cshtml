@@ -1,0 +1,258 @@
+﻿
+@{
+    ViewBag.Title = "WebApi";
+}
+
+<div>
+    <h3 align="center">Реализация Web Api</h3>
+    <div id="tableBlock"></div>
+    <hr/>
+    <div class="navbar-btn">
+        <button class="btn-primary Add">Добавить</button>
+        <button class="btn-info Edit">Редактировать</button>
+        <button class="btn-danger Delete">Удалить</button>
+    </div>
+    <div class="dDelete">
+        <div>
+            <label>Введите ID удаляемого магазина: </label><input type="text" id="shopDelete"/>
+            <button class="btn-default" onclick="DeleteItem()">Ok</button>
+        </div>
+    </div>
+    <div class="dAdd">
+        <p>
+            <b>Добавление магазина</b>
+        </p>
+        <div class="row addCol">
+            <div class="col-lg-3">
+                <label>Введите название магазина: </label>
+            </div>
+            <div class="col-lg-3">
+                <input type="text" id="addName"/>
+            </div>
+        </div>
+        <div class="row addCol">
+            <div class="col-lg-3">
+                <label>Введите адрес магазина: </label>
+            </div>
+            <div class="col-lg-3">
+                <input type="text" id="addAddress"/>
+            </div>
+        </div>
+        <div class="row addCol">
+            <div class="col-lg-3">
+                <label>Введите время работы магазина: </label>
+            </div>
+            <div class="col-lg-3">
+                <input type="text" id="addShedule"/>
+            </div>
+        </div>
+        <button class="btn-default" onclick="AddShop()">Ok</button>
+    </div>
+    <div class="dEdit">
+        <label>Введите ID магазина для редактирования: </label><input type="text" id="shopEdit"/>
+        <button class="btn-default" onclick="EditItem()">Ok</button>
+    </div>
+</div>
+<div class="dEditShop">
+    <p>
+        <b>Редактирование магазина</b>
+    </p>
+    <div class="hidden">
+        <input type="hidden" id="editId"/>
+    </div>
+    <div class="row editCol">
+        <div class="col-lg-3">
+            <label>Название магазина: </label>
+        </div>
+        <div class="col-lg-3">
+            <input type="text" id="editName"/>
+        </div>
+    </div>
+    <div class="row editCol">
+        <div class="col-lg-3">
+            <label>Адрес магазина: </label>
+        </div>
+        <div class="col-lg-3">
+            <input type="text" id="editAddress"/>
+        </div>
+    </div>
+    <div class="row editCol">
+        <div class="col-lg-3">
+            <label>Время работы магазина: </label>
+        </div>
+        <div class="col-lg-3">
+            <input type="text" id="editShedule"/>
+        </div>
+    </div>
+    <button class="btn-default" onclick="EditShop()">Ok</button>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function() {
+            GetAllShops();
+        });
+
+        $(".Delete").click(function() {
+            $(".dAdd").hide();
+            $(".dEdit").hide();
+            $(".dEditShop").hide();
+            $(".dDelete").show();
+
+        });
+
+        $(".Add").click(function () {
+            $(".dAdd").show();
+            $(".dEdit").hide();
+            $(".dEditShop").hide();
+            $(".dDelete").hide();
+        });
+
+        $(".Edit").click(function () {
+            $(".dAdd").hide();
+            $(".dEdit").show();
+            $(".dEditShop").hide();
+            $(".dDelete").hide();
+        });
+
+        // Список всех магазинов
+        function GetAllShops() {
+            $.ajax({
+                url: '/api/shops',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    WriteResponse(data);
+                },
+                error: function(x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+
+        // Удаление
+        function DeleteShop(id) {
+            $.ajax({
+                url: '/api/shops/' + id,
+                type: 'DELETE',
+                contentType: "application/json;charset=utf-8",
+                success: function() {
+                    GetAllShops();
+                },
+                error: function(x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+
+        function DeleteItem() {
+
+            var id = document.getElementById('shopDelete').value;
+            DeleteShop(id);
+            document.getElementById('shopDelete').value = "";
+        }
+
+        // Вывод
+        function WriteResponse(shops) {
+            var strResult = "<table class='jstable'>" +
+                "<th>ID</th>" +
+                "<th>Название</th>" +
+                "<th>Адрес</th>" +
+                "<th>Время работы</th>";
+            $.each(shops, function(index, shop) {
+                strResult += "<tr><td>" + shop.Id +
+                    "</td><td> " + shop.Name +
+                    "</td><td>" + shop.Address +
+                    "</td><td>" + shop.Shedule;
+            });
+            strResult += "</table>";
+            $("#tableBlock").html(strResult);
+
+        }
+
+        // Добавление
+        function AddShop() {
+            var book = {
+                Name: $('#addName').val(),
+                Address: $('#addAddress').val(),
+                Shedule: $('#addShedule').val()
+            };
+
+            $.ajax({
+                url: '/api/shops/',
+                type: 'POST',
+                data: JSON.stringify(book),
+                contentType: "application/json;charset=utf-8",
+                success: function () {
+                    GetAllShops();
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+            $(".dAdd").hide();
+        }
+
+        // Редактирование
+        function EditShop() {
+            var id = $('#editId').val();
+            var book = {
+                Id: $('#editId').val(),
+                Name: $('#editName').val(),
+                Address: $('#editAddress').val(),
+                Shedule: $('#editShedule').val()
+            };
+            $.ajax({
+                url: '/api/shops/' + id,
+                type: 'PUT',
+                data: JSON.stringify(book),
+                contentType: "application/json;charset=utf-8",
+                success: function () {
+                    GetAllShops();
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+            $(".dEditShop").hide();
+        }
+
+        function EditItem() {
+            var id = document.getElementById('shopEdit').value;
+            GetShop(id);
+            document.getElementById('shopEdit').value = "";
+            $(".dEdit").hide();
+            $(".dEditShop").show();
+
+        }
+
+        function GetShop(id) {
+            $.ajax({
+                url: '/api/shops/' + id,
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    ShowShop(data);
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+
+        function ShowShop(shop) {
+            if (shop != null) {
+                $("#createBlock").css('display', 'none');
+                $("#editBlock").css('display', 'block');
+                $("#editId").val(shop.Id);
+                $("#editName").val(shop.Name);
+                $("#editAddress").val(shop.Address);
+                $("#editShedule").val(shop.Shedule);
+            }
+            else {
+                alert("Такая книга не существует");
+            }
+        }
+    </script>
+}
+
